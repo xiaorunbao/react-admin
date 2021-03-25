@@ -4,7 +4,7 @@ import { Card, Table, Button, Icon, message, Modal } from "antd";
 import { reqCategorys, reqUpdateCategory, reqAddCategory } from "../../api";
 import AddForm from "./add-form";
 import UpdateForm from "./update-form";
-import LinkButton from "../../componets/link-button";
+import LinkButton from "../../components/link-button";
 
 /*
 商品分类路由
