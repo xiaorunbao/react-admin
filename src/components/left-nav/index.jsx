@@ -1,39 +1,33 @@
 import { Icon, Menu } from "antd";
 import React, { Component } from "react";
 import { Link, withRouter } from "react-router-dom";
-import menuList from "../../constants/menu";
 import logo from "../../assets/images/logo.png";
-import memoryUtils from "../../utils/memory-utils";
 import "./index.less";
 import { connect } from "react-redux";
 import { setHeadTitle } from "../../redux/actions";
+import menuList from "../../constants/menu";
 const { SubMenu } = Menu;
+
 /**
  * 左侧导航组件
  */
 class LeftNav extends Component {
-  /*在第一次 render()之前执行一次 一般可以在此同步为第一次 render()准备数据 */
   componentWillMount() {
-    this.menuSet = new Set(memoryUtils.user.role.menus || []);
     this.menuNodes = this.getMenus(menuList);
-    //  this.menuNodes = this.getMenuNodes2(menuConfig)
   }
-
   /*判断当前用户是否有看到当前 item 对应菜单项的权限 */
   hasAuth = (item) => {
     const key = item.key;
-    const menuSet = this.menuSet;
+    const menu = this.props.user.menus;
+    const username = this.props.user.username;
     /*1. 如果菜单项标识为公开 2. 如果当前用户是 admin 3. 如果菜单项的 key 在用户的 menus 中*/
-    if (
-      item.isPublic ||
-      memoryUtils.user.username === "admin" ||
-      menuSet.has(key)
-    ) {
+    if (item.isPublic || username === "admin" || menu.indexOf(key) !== -1) {
       return true;
       // 4. 如果有子节点, 需要判断有没有一个 child 的 key 在 menus 中
     } else if (item.children) {
-      return !!item.children.find((child) => menuSet.has(child.key));
+      return !!item.children.find((child) => menu.indexOf(child.key) !== -1);
     }
+    return false;
   };
 
   getMenus = (mList) => {
@@ -83,10 +77,6 @@ class LeftNav extends Component {
               {this.getMenus(item.children)}
             </SubMenu>
           );
-
-          // if (item.children.find((cItem) => path.indexOf(cItem.key) === 0)) {
-          //   this.openKey = item.key;
-          // }
         }
       }
       return pre;

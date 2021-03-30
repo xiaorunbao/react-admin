@@ -1,8 +1,7 @@
 import React, { Component } from "react";
 import { Redirect, Route, Switch } from "react-router-dom";
 import { Layout } from "antd";
-import memoryUtils from "../../utils/memory-utils";
-import storageUtils from "../../utils/storage-utils";
+import { connect } from "react-redux";
 import Header from "../../components/header";
 import LeftNav from "../../components/left-nav";
 
@@ -20,12 +19,9 @@ import NotFound from "../not-found/not-found";
 const { Footer, Sider, Content } = Layout;
 
 /*后台管理主路由组件 */
-export default class Admin extends Component {
+class Admin extends Component {
   render() {
-    const user = storageUtils.getUser();
-    if (user && user._id) {
-      memoryUtils.user = user;
-    }
+    const user = this.props.user;
     if (!user._id) {
       return <Redirect to="/login" />;
     }
@@ -57,3 +53,4 @@ export default class Admin extends Component {
     );
   }
 }
+export default connect((state) => ({ user: state.user }))(Admin);

@@ -1,11 +1,10 @@
 import React, { Component } from "react";
-import { Form, Input, Icon, Button, message } from "antd";
+import { Form, Input, Icon, Button } from "antd";
 import logo from "./images/logo.png";
 import "./login.less";
-import { reqLogin } from "../../api";
-import memoryUtils from "../../utils/memory-utils";
-import storageUtils from "../../utils/storage-utils";
 import { Redirect } from "react-router";
+import { connect } from "react-redux";
+import { login } from "../../redux/actions";
 
 const Item = Form.Item;
 
@@ -18,30 +17,16 @@ class Login extends Component {
     this.props.form.validateFields(async (err, values) => {
       if (!err) {
         const { username, password } = values;
-        console.log("提交登陆请求", username, password);
-        console.log("发送登陆的 ajax 请求", username, password);
-        const result = await reqLogin(username, password);
-        console.log("login()", result);
-        // 校验成功
-        if (result.status === 0) {
-          // 提示登录成功
-          message.success("登录成功", 2);
-          // 保存用户登录信息
-          const user = result.data;
-          storageUtils.saveUser(user);
-          memoryUtils.user = user;
-          // 跳转到主页面
-          this.props.history.replace("/");
-        } else {
-          // 登录失败, 提示错误
-          message.error(result.msg);
-        }
+        // const result = await reqLogin(username, password);
+        this.props.login(username, password);
       } else {
         // 校验失败
         console.log(err);
       }
     });
-  }; /*** 自定义表单的校验规则 */
+  };
+
+  /*** 自定义表单的校验规则 */
   validator = (rule, value, callback) => {
     // console.log(rule, value)
     const length = value && value.length;
@@ -62,9 +47,10 @@ class Login extends Component {
   };
 
   render() {
-    // 如果用户已经登陆, 自动跳转到 admin
-    if (memoryUtils.user && memoryUtils.user._id) {
-      return <Redirect to="/" />;
+    // 如果用户已经登陆, 自动跳转到首页
+    const user = this.props.user;
+    if (user && user._id) {
+      return <Redirect to="/home" />;
     }
 
     const { getFieldDecorator } = this.props.form;
@@ -75,6 +61,9 @@ class Login extends Component {
           <h1>React 项目: 后台管理系统</h1>
         </header>
         <section className="login-content">
+          <div className={user.errorMsg ? "error-msg show" : "error-msg"}>
+            {user.errorMsg}
+          </div>
           <h3>用户登陆</h3>
           <Form onSubmit={this.login} className="login-form">
             <Item>
@@ -132,4 +121,5 @@ class Login extends Component {
     );
   }
 }
-export default Form.create()(Login);
+const WarpFrom = Form.create()(Login);
+export default connect((state) => ({ user: state.user }), { login })(WarpFrom);
