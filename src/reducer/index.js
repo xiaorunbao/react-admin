@@ -4,7 +4,7 @@ import {
   RECEIVE_USER,
   SHOW_ERROR_MSG,
   RESET_USER,
-} from "./action-types";
+} from "../redux/action-types";
 import storageUtils from "../utils/storage-utils";
 
 /*管理 headTitle 状态数据的 reducer */

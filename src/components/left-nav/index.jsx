@@ -5,7 +5,8 @@ import menuList from "../../constants/menu";
 import logo from "../../assets/images/logo.png";
 import memoryUtils from "../../utils/memory-utils";
 import "./index.less";
-
+import { connect } from "react-redux";
+import { setHeadTitle } from "../../redux/actions";
 const { SubMenu } = Menu;
 /**
  * 左侧导航组件
@@ -37,18 +38,38 @@ class LeftNav extends Component {
 
   getMenus = (mList) => {
     const path = this.props.location.pathname;
+    // 如果当前请求的是根路径, 设置头部标题为首页
+    if (path === "/") {
+      this.props.setHeadTitle("首页");
+    }
+
     return mList.reduce((pre, item) => {
       if (this.hasAuth(item)) {
         if (!item.children) {
+          // 一旦请求路径匹配上当前 item, 将 item 的 title 保存到 redux
+          if (item.key === path || path.indexOf(item.key) === 0) {
+            this.props.setHeadTitle(item.title);
+          }
           pre.push(
             <Menu.Item key={item.key}>
-              <Link to={item.key}>
+              <Link
+                to={item.key}
+                onClick={() => this.props.setHeadTitle(item.title)}
+              >
                 <Icon type={item.icon} />
                 <span>{item.title}</span>
               </Link>
             </Menu.Item>
           );
         } else {
+          // 查找一个与当前请求路径匹配的子 Item
+          const cItem = item.children.find(
+            (cItem) => path.indexOf(cItem.key) === 0
+          ); // 如果存在, 说明当前 item 的子列表需要打开
+          if (cItem) {
+            this.openKey = item.key;
+          }
+
           pre.push(
             <SubMenu
               key={item.key}
@@ -63,9 +84,9 @@ class LeftNav extends Component {
             </SubMenu>
           );
 
-          if (item.children.find((cItem) => path.indexOf(cItem.key) === 0)) {
-            this.openKey = item.key;
-          }
+          // if (item.children.find((cItem) => path.indexOf(cItem.key) === 0)) {
+          //   this.openKey = item.key;
+          // }
         }
       }
       return pre;
@@ -74,7 +95,13 @@ class LeftNav extends Component {
 
   render() {
     // 得到当前请求路径, 作为选中菜单项的 key
-    const selectKey = this.props.location.pathname;
+    let selectKey = this.props.location.pathname;
+    console.log("render()", selectKey);
+
+    if (selectKey.indexOf("/product") === 0) {
+      // 当前请求的是商品或其子路由界面
+      selectKey = "/product";
+    }
     const openKey = this.openKey;
     return (
       <div className="left-nav">
@@ -94,4 +121,6 @@ class LeftNav extends Component {
     );
   }
 }
-export default withRouter(LeftNav);
+export default connect((state) => ({ user: state.user }), { setHeadTitle })(
+  withRouter(LeftNav)
+);

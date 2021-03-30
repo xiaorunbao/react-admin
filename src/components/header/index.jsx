@@ -9,6 +9,8 @@ import menuList from "../../constants/menu";
 import "./index.less";
 import LinkButton from "../link-button";
 import { withRouter } from "react-router";
+import { connect } from "react-redux";
+import { logout } from "../../redux/actions";
 
 /**
  * 头部组件
@@ -40,6 +42,7 @@ class Header extends Component {
     Modal.confirm({
       content: "确定退出吗?",
       onOk: () => {
+        this.props.logout();
         console.log("OK");
         // 移除保存的 user
         storageUtils.removeUser();
@@ -83,11 +86,12 @@ class Header extends Component {
     const { sysTime, dayPictureUrl, weather } = this.state;
 
     // 得到当前用户
-    const user = memoryUtils.user;
+    const user = this.props.user.username;
     // 得到当前请求的路径
-    const path = this.props.location.pathname;
+    // const path = this.props.location.pathname;
     // 得到对应的标题
-    const title = this.getTitle(path);
+    // const title = this.getTitle(path);
+    const title = this.props.headTitle;
     return (
       <div className="header">
         <div className="header-top">
@@ -106,4 +110,7 @@ class Header extends Component {
   }
 }
 
-export default withRouter(Header);
+export default connect(
+  (state) => ({ user: state.user, headTitle: state.headTitle }),
+  { logout }
+)(withRouter(Header));
