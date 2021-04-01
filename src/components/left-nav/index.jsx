@@ -18,7 +18,7 @@ class LeftNav extends Component {
   /*判断当前用户是否有看到当前 item 对应菜单项的权限 */
   hasAuth = (item) => {
     const key = item.key;
-    const menu = this.props.user.menus;
+    const menu = this.props.user?.role?.menus;
     const username = this.props.user.username;
     /*1. 如果菜单项标识为公开 2. 如果当前用户是 admin 3. 如果菜单项的 key 在用户的 menus 中*/
     if (item.isPublic || username === "admin" || menu.indexOf(key) !== -1) {
